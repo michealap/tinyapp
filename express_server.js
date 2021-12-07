@@ -50,16 +50,22 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
   //check if its in the database already
-  const newShortUrl = generateRandomString();
+  const newShortURL = generateRandomString();
   //shortURL- longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
-  urlDatabase[newShortUrl] = req.body.longURL;
+  urlDatabase[newShortURL] = req.body.longURL;
   //redirect to /urls
-  res.redirect(`/urls/${newShortUrl}`);
+  res.redirect(`/urls/${newShortURL}`);
 });
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
