@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/michealap/tinyapp#readme",
   "dependencies": {
+    "ejs": "^3.1.6",
     "expres": "0.0.5",
     "express": "^4.17.1"
   }
