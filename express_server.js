@@ -8,6 +8,14 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// const generateRandomString = function() {
+//   let randomString = "";
+//for (let i = 0; i < 6; i++) {
+//     const randomCharCode = Math.floor(Math.random() * 26 + 97);
+//     const randomChar = String.fromCharCode(randomCharCode);     randomString += randomChar;
+//   }   return randomString;
+// };
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -32,6 +40,17 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
+
+// app.post("/urls", (req, res) => {
+//   console.log(req.body);
+//   // res.send("OK");
+//   //check if its in the database already
+//   const newShortUrl = generateRandomString();
+//   urlDatabase[newShortUrl] = req.body.longURL;
+//   //redirect to /urls
+//   res.redirect(`/urls/${newShortUrl}`);
+// });
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
