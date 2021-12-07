@@ -30,12 +30,20 @@ app.get("/urls.json", (req, res) => {
   //shows a JSON string representing the entire urlDatabase object
   res.json(urlDatabase);
 });
+
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
+});
+
+//delete operation
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
 });
 
 //sending html
@@ -55,6 +63,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+//add new short URL operation
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
