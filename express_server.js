@@ -75,6 +75,13 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
+//login route
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  res.cookie("username", username);
+  res.redirect("/urls");
+});
+
 //add new short URL operation
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
