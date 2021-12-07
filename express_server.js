@@ -17,6 +17,10 @@ app.get("/urls.json", (req, res) => {
   //shows a JSON string representing the entire urlDatabase object
   res.json(urlDatabase);
 });
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+});
 
 //sending html
 app.get("/hello", (req, res) => {
