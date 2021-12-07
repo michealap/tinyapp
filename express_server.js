@@ -52,7 +52,13 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  //check if its in the database already
+  const newShortUrl = generateRandomString();
+  //shortURL- longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
+  urlDatabase[newShortUrl] = req.body.longURL;
+  //redirect to /urls
+  res.redirect(`/urls/${newShortUrl}`);
 });
 
 app.listen(PORT, () => {
