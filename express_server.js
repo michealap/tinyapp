@@ -11,9 +11,15 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+//adding routes
 app.get("/urls.json", (req, res) => {
   //shows a JSON string representing the entire urlDatabase object
   res.json(urlDatabase);
+});
+
+//sending html
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.listen(PORT, () => {
