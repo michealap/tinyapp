@@ -41,7 +41,7 @@ app.get("/urls", (req, res) => {
   }
   const user = users[id];
   if (!user) {
-    return res.status(400).send('you have a stale cookie. please create an account or login');
+    return res.status(400).send('You have a stale cookie. Please create an account or login');
   }
   //console.log("the logged in user is", user.email);
   const templateVars = {urls: urlDatabase, email: user.email};
@@ -82,6 +82,18 @@ const users = {
     password: "dishwasher-funk"
   }
 };
+//helper function
+const findUserByEmail = (email) => {
+  console.log(email, users);
+  for (const id in users) {
+    const currentUser = users[id];
+    if (currentUser.email === email) {
+      //console.log(" this is from email check function", currentUser);
+      return currentUser;
+    }
+    return null;
+  }
+};
 
 //route to show these page
 
@@ -101,24 +113,18 @@ app.get("/register", (req, res) => {
 });
 
 
-const findUserByEmail = (email) => {
-  console.log(email, users);
-  for (const id in users) {
-    const currentUser = users[id];
-    if (currentUser.email === email) {
-      //console.log(" this is from email check function", currentUser);
-      return currentUser;
-    }
-    return null;
-  }
-};
+
 //register route OK
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  //handle registration errors
+  if (!email || !password) {
+    return res.status(400).send("email and password cannot be blank");
+  }
 
   const currentUser = findUserByEmail(email);
-
+  //if current registration matches the email found, return error
   if (currentUser) {
     return res.status(400).send("a user with that email already exists");
   }
@@ -148,6 +154,8 @@ app.post("/login", (req, res) => {
 
   const email = req.body.email;
   const password = req.body.password;
+
+  
   const currentUser = findUserByEmail(email);
   console.log('current User is',currentUser);
 
