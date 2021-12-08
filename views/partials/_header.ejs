@@ -16,7 +16,7 @@
       <button type="submit" class="btn btn-outline-dark">Login</button>
     </form>
     <% } else { %>
-      <%= username %>
+      Logged In As: <%= username %> !   <form class="form-inline justify-content" action="/logout" method="POST"><button type="submit" class="btn btn-outline-dark">Logout</button></form>
       <% } %>
   </nav>
 </header>
