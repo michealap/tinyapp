@@ -13,6 +13,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+
 //simulate generating a 'unique' shortURL
 const generateRandomString = function() {
   let randomString = "";
@@ -34,25 +35,33 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const id = req.cookies.user_id;
+  if (!id) {
+    return res.status(400).send("you are not authorized to be here");
+  }
+  const user = users[id];
+  if (!user) {
+    return res.status(400).send('you have a stale cookie. please create an account or login');
+  }
+  //console.log("the logged in user is", user.email);
+  const templateVars = {urls: urlDatabase, email: user.email};
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = {email: user.email};
   res.render("urls_new", templateVars);
 });
 
-app.get("/register", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
-  res.render("register", templateVars);
-});
-
 app.get("/urls/:shortURL", (req, res) => {
+  const id = req.cookies.user_id;
+  const user = users[id];
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]};
+    email: user.email};
   res.render("urls_show", templateVars);
 });
 
@@ -61,19 +70,107 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
 
-//login route
-app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie("username", username);
+//route to show these page
+
+app.get("/login", (req, res) => {
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = {email: user ? user.email : false};
+  res.render("login", templateVars);
+});
+
+
+app.get("/register", (req, res) => {
+  const id = req.cookies.user_id;
+  const user = users[id];
+  const templateVars = {email: user ? user.email : false};
+  res.render("register", templateVars);
+});
+
+
+const findUserByEmail = (email) => {
+  console.log(email, users);
+  for (const id in users) {
+    const currentUser = users[id];
+    if (currentUser.email === email) {
+      //console.log(" this is from email check function", currentUser);
+      return currentUser;
+    }
+    return null;
+  }
+};
+//register route OK
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const currentUser = findUserByEmail(email);
+
+  if (currentUser) {
+    return res.status(400).send("a user with that email already exists");
+  }
+
+  const id = generateRandomString();
+
+  users[id] = {
+    id: id,
+    email: email,
+    password: password
+  };
+  console.log('users', users);
+
+  //Object.assign(users, {userId: { id: `${userId}`, email: req.body["email"], password: req.body["password"] }}); //how to update object name
+  //console.log(users);
+  res.cookie("user_id", id);
   res.redirect("/urls");
 });
 
+
+//login route
+//check to see if that user exists in our users
+//check passwords
+//set a cookie that says they are logged in
+
+app.post("/login", (req, res) => {
+
+  const email = req.body.email;
+  const password = req.body.password;
+  const currentUser = findUserByEmail(email);
+  console.log('current User is',currentUser);
+
+  if (currentUser === null) {
+    return res.status(400).send("a user with that email does not exist");
+  }
+
+  if (currentUser.password !== password) {
+    return res.status(400).send("your password does not match");
+  }
+  //after all checks
+  res.redirect("/urls");
+});
+
+
+
 //logout route
 app.post("/logout", (req, res) => {
-  const username = req.body.username;
-  res.clearCookie("username", username);
-  res.redirect("/urls");
+  //const username = req.body.username;
+  //res.clearCookie("username", username);
+  res.clearCookie("user_id");
+  //res.redirect("/urls");
+  res.redirect("/login");
 });
 
 //sending html
@@ -98,11 +195,9 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-
-
 //add new short URL operation
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
+  //console.log(req.body);  // Log the POST request body to the console
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
   //check if its in the database already
   const newShortURL = generateRandomString();
