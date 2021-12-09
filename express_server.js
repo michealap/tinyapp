@@ -34,7 +34,34 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
 app.get("/urls", (req, res) => {
+  // if (!id) {
+  //   return res.status(400).send("you are not authorized to be here");
+  // }
+  const id = req.cookies.user_id;
+  const user = users[id];
+  // if (!user) {
+  //   return res.status(400).send('You have a stale cookie. Please create an account or login');
+  // }
+  //console.log("the logged in user is", user.email);
+  const templateVars = {urls: urlDatabase, email: user.email};
+  res.render("urls_index", templateVars);
+});
+
+app.get("/urls/new", (req, res) => {
   const id = req.cookies.user_id;
   if (!id) {
     return res.status(400).send("you are not authorized to be here");
@@ -43,14 +70,6 @@ app.get("/urls", (req, res) => {
   if (!user) {
     return res.status(400).send('You have a stale cookie. Please create an account or login');
   }
-  //console.log("the logged in user is", user.email);
-  const templateVars = {urls: urlDatabase, email: user.email};
-  res.render("urls_index", templateVars);
-});
-
-app.get("/urls/new", (req, res) => {
-  const id = req.cookies.user_id;
-  const user = users[id];
   const templateVars = {email: user.email};
   res.render("urls_new", templateVars);
 });
@@ -70,18 +89,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
+
 //helper function
 const findUserByEmail = (email) => {
   console.log(email, users);
@@ -166,7 +174,9 @@ app.post("/login", (req, res) => {
   if (currentUser.password !== password) {
     return res.status(403).send("your password does not match");
   }
+  console.log(email, password, currentUser, "cool");
   //after all checks
+  res.cookie("user_id", currentUser.id);
   res.redirect("/urls");
 });
 
