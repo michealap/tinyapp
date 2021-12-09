@@ -38,7 +38,7 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "purple"
   },
   "user2RandomID": {
     id: "user2RandomID",
@@ -48,11 +48,11 @@ const users = {
 };
 
 app.get("/urls", (req, res) => {
-  // if (!id) {
-  //   return res.status(400).send("you are not authorized to be here");
-  // }
   const id = req.cookies.user_id;
   const user = users[id];
+  if (!id) {
+    return res.status(400).send("You are not authorized to be here. Please login");
+  }
   // if (!user) {
   //   return res.status(400).send('You have a stale cookie. Please create an account or login');
   // }
@@ -61,18 +61,28 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.post("/urls", (req, res) => {
+  const id = req.cookies.user_id;
+  //const user = users[id];
+  if (!id) {
+    return res.status(400).send('Please create an account or login');
+  } else {
+    return res.status(400).send('id is there');
+  }
+});
+
 app.get("/urls/new", (req, res) => {
   const id = req.cookies.user_id;
-  if (!id) {
-    return res.status(400).send("you are not authorized to be here");
-  }
   const user = users[id];
-  if (!user) {
-    return res.status(400).send('You have a stale cookie. Please create an account or login');
+  if (!id) {
+    //res.status(400).send('You have a stale cookie. Please create an account or login');
+    res.redirect("/login");
   }
   const templateVars = {email: user.email};
   res.render("urls_new", templateVars);
 });
+
+
 
 app.get("/urls/:shortURL", (req, res) => {
   const id = req.cookies.user_id;
@@ -86,6 +96,9 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
+  if (!longURL) {
+    return res.status(400).send("This short URL does not exist");
+  }
   res.redirect(longURL);
 });
 
@@ -159,11 +172,9 @@ app.post("/register", (req, res) => {
 //set a cookie that says they are logged in
 
 app.post("/login", (req, res) => {
-
   const email = req.body.email;
   const password = req.body.password;
 
-  
   const currentUser = findUserByEmail(email);
   console.log('current User is',currentUser);
 
@@ -174,7 +185,7 @@ app.post("/login", (req, res) => {
   if (currentUser.password !== password) {
     return res.status(403).send("your password does not match");
   }
-  console.log(email, password, currentUser, "cool");
+  //console.log(email, password, currentUser, "cool");
   //after all checks
   res.cookie("user_id", currentUser.id);
   res.redirect("/urls");
