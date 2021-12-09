@@ -5,23 +5,23 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
     integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>Login Page Tiny App Template</title>
+  <title>Login - Tiny App</title>
 </head>
 
 <body>
   <%- include('partials/_header') %>
   <main>
 
-    <div class="card-body text-muted d-flex justify-content-center container-fluid">
+    <div class="card-body text-muted d-flex justify-content-left container-fluid">
       <div>
-        <h2 class="card-title">Login Here</h2>
+        <h2 class="card-title">Login</h2>
         <table class="table">
           <form class="form-inline" action="/login" method="POST">
             <tr>
               <label for=email>Email</label>
-              <input class="form-control mb-2" type="email" name="email">
+              <input class="form-control mb-2" type="email" name="email" placeholder="Enter email">
               <label for=password>Password</label>
-              <input class="form-control mb-2" type="password" name="password">
+              <input class="form-control mb-2" type="password" name="password" placeholder="Password">
               <button type="submit" class="btn btn-primary">Login</button>
             </tr>
           </form>
