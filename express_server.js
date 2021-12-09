@@ -160,11 +160,11 @@ app.post("/login", (req, res) => {
   console.log('current User is',currentUser);
 
   if (currentUser === null) {
-    return res.status(400).send("a user with that email does not exist");
+    return res.status(403).send("a user with that email does not exist");
   }
 
   if (currentUser.password !== password) {
-    return res.status(400).send("your password does not match");
+    return res.status(403).send("your password does not match");
   }
   //after all checks
   res.redirect("/urls");
