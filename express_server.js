@@ -61,7 +61,7 @@ const findUserByEmail = (email) => {
 const fetchUrlsObj = function(urlDatabase, id) {
   let urlsObj = {};
   for (let shortUrl in urlDatabase) {
-    if (urlDatabase[shortUrl].userID == id) {
+    if (urlDatabase[shortUrl].userID === id) {
       urlsObj[shortUrl] = urlDatabase[shortUrl].longURL;
     }
   }
@@ -132,6 +132,7 @@ app.get("/urls/new", (req, res) => {
   const id = req.cookies.user_id;
   const user = users[id];
   if (!id) {
+    //res.status(400).send('You have a stale cookie. Please create an account or login');
     res.redirect("/login");
   }
   const templateVars = {user: user};
@@ -146,7 +147,7 @@ app.get("/urls/:shortURL", (req, res) => {
   //let shortURL = req.params.shortURL;
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user: user};
     // if (urlDatabase[shortURL]["user_id"] !== id) {
     //   res.redirect("/login");
@@ -163,7 +164,7 @@ app.get("/u/:shortURL", (req, res) => {
   } else {
     urlsObj = fetchUrlDatabase(urlDatabase);
   }
-  const longURL = urlsObj[req.params.shortURL];
+  const longURL = urlsObj[req.params.shortURL].longURL;
   //console.log(urlsObj, longURL);
   res.redirect(longURL);
 });
@@ -272,15 +273,16 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 
 //edit operation
-app.post("/urls/:id", (req, res) => {
+app.post("/urls/:shortURL", (req, res) => {
   const id = req.cookies.user_id;
   if (!id) {
     res.status(400).send('You are not authorized');
   }
-  let shortURL = req.params.id;
-  let fullURL = req.body.longURL;
-  console.log("editing", req.body);
-  urlDatabase[shortURL] = fullURL;
+  let shortURL = req.params.shortURL;
+  console.log(shortURL);
+  //console.log("editing", req.body);
+  urlDatabase[shortURL].longURL = req.body.longURL;
+  //console.log(urlDatabase[shortURL]);
   res.redirect("/urls");
 });
 
