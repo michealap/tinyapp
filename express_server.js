@@ -8,32 +8,7 @@ app.set("view engine", "ejs");//set ejs as the view engine
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
-
-
-//simulate generating a 'unique' shortURL
-const generateRandomString = function() {
-  let randomString = "";
-  for (let i = 0; i < 6; i++) {
-    const randomCharCode = Math.floor(Math.random() * 26 + 97);
-    const randomChar = String.fromCharCode(randomCharCode);
-    randomString += randomChar;
-  }   return randomString;
-};
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-//adding routes
-app.get("/urls.json", (req, res) => {
-  //shows a JSON string representing the entire urlDatabase object
-  res.json(urlDatabase);
-});
-
+//data stores
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -47,61 +22,27 @@ const users = {
   }
 };
 
-app.get("/urls", (req, res) => {
-  const id = req.cookies.user_id;
-  const user = users[id];
-  if (!id) {
-    return res.status(400).send("You are not authorized to be here. Please login");
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
   }
-  // if (!user) {
-  //   return res.status(400).send('You have a stale cookie. Please create an account or login');
-  // }
-  //console.log("the logged in user is", user.email);
-  const templateVars = {urls: urlDatabase, email: user.email};
-  res.render("urls_index", templateVars);
-});
-
-app.post("/urls", (req, res) => {
-  const id = req.cookies.user_id;
-  //const user = users[id];
-  if (!id) {
-    return res.status(400).send('Please create an account or login');
-  } else {
-    return res.status(400).send('id is there');
-  }
-});
-
-app.get("/urls/new", (req, res) => {
-  const id = req.cookies.user_id;
-  const user = users[id];
-  if (!id) {
-    //res.status(400).send('You have a stale cookie. Please create an account or login');
-    res.redirect("/login");
-  }
-  const templateVars = {email: user.email};
-  res.render("urls_new", templateVars);
-});
+};
 
 
-
-app.get("/urls/:shortURL", (req, res) => {
-  const id = req.cookies.user_id;
-  const user = users[id];
-  const templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
-    email: user.email};
-  res.render("urls_show", templateVars);
-});
-
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
-  if (!longURL) {
-    return res.status(400).send("This short URL does not exist");
-  }
-  res.redirect(longURL);
-});
-
+//simulate generating a 'unique' shortURL
+const generateRandomString = function() {
+  let randomString = "";
+  for (let i = 0; i < 6; i++) {
+    const randomCharCode = Math.floor(Math.random() * 26 + 97);
+    const randomChar = String.fromCharCode(randomCharCode);
+    randomString += randomChar;
+  }   return randomString;
+};
 
 //helper function
 const findUserByEmail = (email) => {
@@ -116,12 +57,124 @@ const findUserByEmail = (email) => {
   }
 };
 
-//route to show these page
+//urlsForUser(id) = fetchUrlsObj
+const fetchUrlsObj = function(urlDatabase, id) {
+  let urlsObj = {};
+  for (let shortUrl in urlDatabase) {
+    if (urlDatabase[shortUrl].userID == id) {
+      urlsObj[shortUrl] = urlDatabase[shortUrl].longURL;
+    }
+  }
+  return urlsObj;
+};
 
+const fetchUrlDatabase = function(urlDatabase) {
+  let urlsObj = {};
+  for (let urls in urlDatabase) {
+    urlsObj[urls] = urlDatabase[urls].longURL;
+  }
+  return urlsObj;
+};
+
+app.get("/", (req, res) => {
+  res.send("Hello!");
+});
+
+//adding routes
+app.get("/urls.json", (req, res) => {
+  //shows a JSON string representing the entire urlDatabase object
+  res.json(urlDatabase);
+});
+
+
+app.get("/urls", (req, res) => {
+  const id = req.cookies.user_id;
+  const user = users[`${id}`];
+  // if (!id) {
+  //   return res.redirect("/login");
+  // }
+  let urlsObj;
+  if (id) {
+    urlsObj = fetchUrlsObj(urlDatabase, id);
+  } else {
+    urlsObj = fetchUrlDatabase(urlDatabase);
+  }
+  const templateVars = {urls: urlsObj, user: user};
+  res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  const id = req.cookies.user_id;
+  //const user = users[id];
+  // if (!id) {
+  //   return res.status(400).send('Please create an account or login');
+  // }
+  const longURL = req.body.longURL;
+  const newShortURL = generateRandomString();
+  urlDatabase[newShortURL] = {
+    longURL,
+    userID: id
+  };
+  res.redirect("/urls");
+  //return res.status(400).send('id is there');
+});
+
+//add new short URL operation
+app.post("/urls", (req, res) => {
+  const newShortURL = generateRandomString();
+  //shortURL- longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
+  urlDatabase[newShortURL] = req.body.longURL;
+  //redirect to /urls - anyone can visit shortUrls
+  res.redirect(`/urls/${newShortURL}`);
+});
+
+app.get("/urls/new", (req, res) => {
+  const id = req.cookies.user_id;
+  const user = users[id];
+  if (!id) {
+    //res.status(400).send('You have a stale cookie. Please create an account or login');
+    res.redirect("/login");
+  }
+  const templateVars = {user: user};
+  res.render("urls_new", templateVars);
+});
+
+
+
+app.get("/urls/:shortURL", (req, res) => {
+  const id = req.cookies.user_id;
+  const user = users[id];
+  //let shortURL = req.params.shortURL;
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    user: user};
+    // if (urlDatabase[shortURL]["user_id"] !== id) {
+    //   res.redirect("/login");
+    // }
+  res.render("urls_show", templateVars);
+});
+
+//u route
+app.get("/u/:shortURL", (req, res) => {
+  const id = req.cookies.user_id;
+  let urlsObj;
+  if (id) {
+    urlsObj = fetchUrlsObj(urlDatabase, id);
+  } else {
+    urlsObj = fetchUrlDatabase(urlDatabase);
+  }
+  const longURL = urlsObj[req.params.shortURL];
+  //console.log(urlsObj, longURL);
+  res.redirect(longURL);
+});
+
+
+//route to show these page
 app.get("/login", (req, res) => {
   const id = req.cookies.user_id;
   const user = users[id];
-  const templateVars = {email: user ? user.email : false};
+  const templateVars = {user: user};
   res.render("login", templateVars);
 });
 
@@ -129,7 +182,7 @@ app.get("/login", (req, res) => {
 app.get("/register", (req, res) => {
   const id = req.cookies.user_id;
   const user = users[id];
-  const templateVars = {email: user ? user.email : false};
+  const templateVars = {user: user};
   res.render("register", templateVars);
 });
 
@@ -223,19 +276,6 @@ app.post("/urls/:id", (req, res) => {
   urlDatabase[shortURL] = fullURL;
   res.redirect("/urls");
 });
-
-//add new short URL operation
-app.post("/urls", (req, res) => {
-  //console.log(req.body);  // Log the POST request body to the console
-  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  //check if its in the database already
-  const newShortURL = generateRandomString();
-  //shortURL- longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
-  urlDatabase[newShortURL] = req.body.longURL;
-  //redirect to /urls
-  res.redirect(`/urls/${newShortURL}`);
-});
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
