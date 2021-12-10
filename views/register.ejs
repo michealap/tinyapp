@@ -9,7 +9,14 @@
 </head>
 
 <body>
-  <%- include('partials/_header') %>
+
+  <header>
+    <% if (user) { %>
+      <%- include('partials/_header', {user: user}) %>
+        <%} else { %>
+          <%- include('partials/_header') %>
+            <% } %>
+  </header>
   <main>
     <div class="text-muted d-flex justify-content-left container-fluid">
       <div>
