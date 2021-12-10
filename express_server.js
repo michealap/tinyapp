@@ -3,6 +3,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
+
 app.set("view engine", "ejs");//set ejs as the view engine
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -13,12 +15,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple"
+    password: bcrypt.hashSync("purple", 10)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   }
 };
 
@@ -132,7 +134,6 @@ app.get("/urls/new", (req, res) => {
   const id = req.cookies.user_id;
   const user = users[id];
   if (!id) {
-    //res.status(400).send('You have a stale cookie. Please create an account or login');
     res.redirect("/login");
   }
   const templateVars = {user: user};
@@ -191,29 +192,30 @@ app.get("/register", (req, res) => {
 //register route OK
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  let password = req.body.password;
+  let hashedPassword = bcrypt.hashSync(password, 10);
+  console.log(hashedPassword);
+
   //handle registration errors
   if (!email || !password) {
     return res.status(400).send("email and password cannot be blank");
   }
-
   const currentUser = findUserByEmail(email);
   //if current registration matches the email found, return error
   if (currentUser) {
     return res.status(400).send("a user with that email already exists");
   }
 
+  
   const id = generateRandomString();
 
   users[id] = {
     id: id,
     email: email,
-    password: password
+    password: hashedPassword
   };
+  
   console.log('users', users);
-
-  //Object.assign(users, {userId: { id: `${userId}`, email: req.body["email"], password: req.body["password"] }}); //how to update object name
-  //console.log(users);
   res.cookie("user_id", id);
   res.redirect("/urls");
 });
@@ -222,11 +224,11 @@ app.post("/register", (req, res) => {
 //login route
 //check to see if that user exists in our users
 //check passwords
-//set a cookie that says they are logged in
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  let password = req.body.password;
+
 
   const currentUser = findUserByEmail(email);
   console.log('current User is',currentUser);
@@ -234,13 +236,12 @@ app.post("/login", (req, res) => {
   if (currentUser === null) {
     return res.status(403).send("a user with that email does not exist");
   }
-
-  if (currentUser.password !== password) {
+  if (bcrypt.compareSync(password,currentUser["password"])) {
+    res.cookie("user_id", currentUser.id);
+  } else {
     return res.status(403).send("your password does not match");
   }
-  //console.log(email, password, currentUser, "cool");
   //after all checks
-  res.cookie("user_id", currentUser.id);
   res.redirect("/urls");
 });
 
@@ -248,10 +249,7 @@ app.post("/login", (req, res) => {
 
 //logout route
 app.post("/logout", (req, res) => {
-  //const username = req.body.username;
-  //res.clearCookie("username", username);
   res.clearCookie("user_id");
-  //res.redirect("/urls");
   res.redirect("/login");
 });
 
@@ -282,7 +280,6 @@ app.post("/urls/:shortURL", (req, res) => {
   console.log(shortURL);
   //console.log("editing", req.body);
   urlDatabase[shortURL].longURL = req.body.longURL;
-  //console.log(urlDatabase[shortURL]);
   res.redirect("/urls");
 });
 
