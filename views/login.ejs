@@ -10,13 +10,7 @@
 
 <body>
    <main>
-    <header>
-    <% if (user) { %>
-      <%- include('partials/_header', {user: user}) %>
-        <%} else { %>
-          <%- include('partials/_header') %>
-            <% } %>
-  </header>
+    <%- include ('partials/_header') %>
     <div class="card-body text-muted d-flex justify-content-left container-fluid">
       <div>
         <h2 class="card-title">Login</h2>
