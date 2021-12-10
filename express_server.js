@@ -132,7 +132,6 @@ app.get("/urls/new", (req, res) => {
   const id = req.cookies.user_id;
   const user = users[id];
   if (!id) {
-    //res.status(400).send('You have a stale cookie. Please create an account or login');
     res.redirect("/login");
   }
   const templateVars = {user: user};
@@ -263,6 +262,10 @@ app.get("/hello", (req, res) => {
 
 //delete operation
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const id = req.cookies.user_id;
+  if (!id) {
+    res.status(400).send('You are not authorized');
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
@@ -270,6 +273,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //edit operation
 app.post("/urls/:id", (req, res) => {
+  const id = req.cookies.user_id;
+  if (!id) {
+    res.status(400).send('You are not authorized');
+  }
   let shortURL = req.params.id;
   let fullURL = req.body.longURL;
   console.log("editing", req.body);
