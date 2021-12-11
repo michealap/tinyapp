@@ -25,8 +25,8 @@ Once a new short URL is created, it is shown both on the home page and the users
 
 ## Final Product
 
-!["Screenshot of Home page"]
-!["Screenshot of Register page"]
-!["Screenshot of New User Dashboard"]
-!["Screenshot of Create New Url page"]
-!["Screenshot of Edit page"]
+!["Screenshot of Home page"](https://github.com/michealap/tinyapp/blob/master/docs/home.PNG?raw=true)
+!["Screenshot of Register page"](https://github.com/michealap/tinyapp/blob/master/docs/register.PNG?raw=true)
+!["Screenshot of New User Dashboard"](https://github.com/michealap/tinyapp/blob/master/docs/userUrl.PNG?raw=true)
+!["Screenshot of Create New Url page"](https://github.com/michealap/tinyapp/blob/master/docs/create.PNG?raw=true)
+!["Screenshot of Edit page"](https://github.com/michealap/tinyapp/blob/master/docs/useredit.PNG?raw=true)
