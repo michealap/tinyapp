@@ -12,7 +12,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
   keys: ['key1'],
-  // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
@@ -41,7 +40,7 @@ const urlDatabase = {
   }
 };
 
-
+//home page for all users
 app.get("/", (req, res) => {
   let id = req.session.userId;
   const user = users[id];
@@ -78,12 +77,12 @@ app.post("/register", (req, res) => {
 
   //handle registration errors
   if (!email || !password) {
-    return res.status(400).send("email and password cannot be blank");
+    return res.status(400).send("Email or password cannot be blank");
   }
   const currentUser = findUserByEmail(email);
   //if current registration matches the email found, return error
   if (currentUser) {
-    return res.status(400).send("a user with that email already exists");
+    return res.status(400).send("A user with that email already exists");
   }
   users[id] = {
     id: id,
@@ -95,7 +94,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-//route to show these page
+//login routes
 app.get("/login", (req, res) => {
   const id = req.session.userId;
   const user = users[id];
@@ -103,7 +102,6 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
-//login route
 app.post("/login", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
@@ -111,14 +109,14 @@ app.post("/login", (req, res) => {
   let currentUser = findUserByEmail(email, users);
 
   if (currentUser === null) {
-    return res.status(403).send("a user with that email does not exist");
+    return res.status(403).send("A user with that email does not exist");
   }
 
   if (bcrypt.compareSync(password, currentUser["password"])) {
     req.session.userId = currentUser.id;
     res.redirect("/urls");
   } else {
-    res.status(403).send("your password does not match");
+    res.status(403).send("Your email or password does not match");
   }
 });
 
@@ -132,6 +130,9 @@ app.post("/logout", (req, res) => {
 app.get("/urls", (req, res) => {
   const id = req.session.userId;
   const user = users[id];
+  if (!user) {
+    res.status(403).send("<html><body><b>Please <a href=/register>create an account</a> or <a href=/login>login</a></b></body></html>");
+  }
   let urlsObj = urlsForUser(urlDatabase, id);
   const templateVars = {urls: urlsObj, user: user};
   res.render("urls_index", templateVars);
@@ -173,7 +174,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-// //add new short URL operation
+//add new short URL operation
 app.post("/urls/:shortURL", (req, res) => {
   const newShortURL = generateRandomString();
   //shortURL- longURL key-value pair are saved to the urlDatabase when it receives a POST request to /urls
@@ -194,18 +195,18 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 
 //edit operation
-app.post("/urls/:shortURL", (req, res) => {
+app.post("/urls/:shortURL/edit", (req, res) => {
   const id = req.session.userId;
   if (!id) {
     res.status(400).send('You are not authorized');
   }
   let shortURL = req.params.shortURL;
-  urlDatabase[shortURL].longURL = req.body.longUR;
+  urlDatabase[shortURL].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
 
-//u route
+//u route redirects to eg.tsn.ca
 app.get("/u/:shortURL", (req, res) => {
   const id = req.session.userId;
   let urlsObj;
@@ -214,7 +215,7 @@ app.get("/u/:shortURL", (req, res) => {
   } else {
     urlsObj = fetchUrlDatabase(urlDatabase);
   }
-  const longURL = urlsObj[req.params.shortURL].longURL;
+  let longURL = urlsObj[req.params.shortURL];
   res.redirect(longURL);
 });
 
