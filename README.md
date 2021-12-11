@@ -27,7 +27,7 @@ Once a new short URL is created, it is shown both on the home page and the users
 
 ### Home page available to all users
 !["Screenshot of Home page"](https://github.com/michealap/tinyapp/blob/master/docs/home.PNG?raw=true)
-#### Create an account to use other features
+### Create an account to use other features
 !["Screenshot of Register page"](https://github.com/michealap/tinyapp/blob/master/docs/register.PNG?raw=true)
 ### Short Url Feature
 !["Screenshot of Create New Url page"](https://github.com/michealap/tinyapp/blob/master/docs/create.PNG?raw=true)
