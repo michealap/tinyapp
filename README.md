@@ -22,6 +22,7 @@ Once a new short URL is created, it is shown both on the home page and the users
 
 - Install all dependencies (using the `npm install` command).
 - Run the development web server using the `node express_server.js` command.
+- The app will be served at http://localhost:8080/. Go to http://localhost:8080/ in your browser.
 
 ## Final Product
 
