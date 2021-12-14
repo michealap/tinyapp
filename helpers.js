@@ -11,14 +11,13 @@ const generateRandomString = function() {
 };
 
 const findUserByEmail = (email, users) => {
-  //console.log(email, users);
   for (const id in users) {
     const currentUser = users[id];
     if (currentUser.email === email) {
       return currentUser;
     }
-    return null;
   }
+  return null;
 };
 
 const urlsForUser = function(urlDatabase, id) {
@@ -31,12 +30,4 @@ const urlsForUser = function(urlDatabase, id) {
   return urlsObj;
 };
 
-const fetchUrlDatabase = function(urlDatabase) {
-  let urlsObj = {};
-  for (let urls in urlDatabase) {
-    urlsObj[urls] = urlDatabase[urls].longURL;
-  }
-  return urlsObj;
-};
-
-module.exports = { generateRandomString, findUserByEmail, urlsForUser, fetchUrlDatabase};
+module.exports = { generateRandomString, findUserByEmail, urlsForUser};
